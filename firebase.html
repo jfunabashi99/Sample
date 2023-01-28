@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Rest & Ajax</title>
+</head>
+<body>
+<!-- <img src="https://firebasestorage.googleapis.com/v0/b/my-first-fullcalendar-app.appspot.com/o/public%2Flena.png?alt=media&token=a9749e4e-5710-4f1d-b390-33f6934d42c6"> -->
+
+<div id="result"></div>
+<script>
+// 以下の例では test.json を使用
+/*
+{
+  "users": {
+   "user1": {
+    "name": "桑田 佳祐",
+    "age": 66
+   }
+  }
+}
+*/
+/*
+// 1) データ受信
+var xhr = new XMLHttpRequest();
+xhr.open("GET", "https://my-first-fullcalendar-app-default-rtdb.firebaseio.com/users/user1.json?t="+Math.random());
+xhr.onload = function () {
+  console.log( xhr.response ); // ファイルの内容
+  var obj = xhr.response;
+  document.getElementById("result").innerHTML = `<p>検索結果： ${obj.name}さんの年齢は ${obj.age}才です。</p><img width="100%" src="${obj.imgURL}}">`;
+}
+xhr.responseType = 'json';  // Content-Type: application/json; charset=utf-8
+xhr.send();
+*/
+/*
+// 2) データ受信
+var xhr = new XMLHttpRequest();
+xhr.open("GET", "https://my-first-fullcalendar-app-default-rtdb.firebaseio.com/users/user1/name.json?t="+Math.random());
+xhr.onload = function () {
+  console.log( xhr.response ); // ファイルの内容
+  var obj = xhr.response;
+  document.getElementById("result").innerHTML = `検索結果： ${obj}`;
+}
+xhr.responseType = 'json';  // Content-Type: application/json; charset=utf-8
+xhr.send();
+
+/*
+// 3) fetchを利用して1)と同じことを行う
+fetch('https://my-first-fullcalendar-app-default-rtdb.firebaseio.com/users/user1.json')
+    .then(response => {
+        return response.json(); // Promiseを返す
+    })
+    .then(data => { // JSONデータ
+        console.log(data);
+        var obj = data;
+        document.getElementById("result").innerHTML = `検索結果： ${obj.name}さんの年齢は ${obj.age}才です。`;
+    })
+    .catch(error => { // エラーの場合
+        console.log(error);
+    });
+*/
+
+// 4) 送信データ（追加）
+const data = {
+    "name": "中島 みゆき",
+    "age": 70,
+    "imgURL": "https://firebasestorage.googleapis.com/v0/b/my-first-fullcalendar-app.appspot.com/o/public%2Flena.png?alt=media&token=a9749e4e-5710-4f1d-b390-33f6934d42c6"
+}
+
+fetch('https://my-first-fullcalendar-app-default-rtdb.firebaseio.com/users/user2.json', {
+        method: 'PUT', // メソッド
+        headers: {
+            'Content-Type': 'application/json', // データ形式
+        },
+        body: JSON.stringify(data) // 送信データ
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        console.log(data);
+        var obj = data;
+        document.getElementById("result").innerHTML = `追加結果： ${obj.name}さん（年齢は ${obj.age}才）を追加しました。`;
+
+    })
+    .catch(error => {
+
+        console.log(error);
+
+    });
+
+/*
+// 5) 送信データ（削除）
+fetch('https://my-first-fullcalendar-app-default-rtdb.firebaseio.com/users/user2.json', {
+        method: 'DELETE', // メソッド
+        headers: {
+            'Content-Type': 'application/json', // データ形式
+        },
+        //body: JSON.stringify(data) // 送信データ
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        //console.log(data);
+        //var obj = data;
+        //document.getElementById("result").innerHTML = `削除結果： ${obj.name}さん（年齢は ${obj.age}才）を削除しました。`;
+
+    })
+    .catch(error => {
+
+        console.log(error);
+
+    });
+*/
+</script>
+</body>
+</html>
