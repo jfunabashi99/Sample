@@ -1,0 +1,145 @@
+<!--
+firebase Storage
+---
+rules_version = '2';
+service firebase.storage {
+  match /public/{allPaths=**} {
+      allow read, write;
+    }
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if
+          request.time < timestamp.date(2022, 12, 30);
+    }
+  }
+}
+
+realtime db 
+---
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null"
+  }
+}
+↓
+---
+{
+  "rules": {
+    ".read": true,
+    ".write": "auth != null"
+  }
+}
+
+
+【Firebase】Realtime Database（version 9）データ操作あれこれ
+https://qiita.com/shiho97797/items/de25f6d61f99497c4a35
+
+firebase realtime database でよく使う rule
+https://qiita.com/mironal/items/b93742e8ef72b3268beb
+
+Firebase Authenticationを利用する【Javascript、Vue.js】
+https://qiita.com/azukiazusa/items/af46d620ff2c3b4327a6
+
+firebase console で下記のjsonを追加
+---
+seq: {
+"nextId": 1
+}
+-->
+<html>
+<head>
+<meta charset='utf-8'>
+<title>Realtime DB 検索</title>
+<script type="module">
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+import {
+  getDatabase,
+  ref as ref_db,
+  //onValue,
+  child,
+  //limitToLast,
+  //onChildAdded,
+  //onChildChanged,
+  //onChildRemoved,
+  get,
+  //query,
+  //orderByChild,
+  //equalTo,
+  //set,
+  //update
+} from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-storage.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js"
+
+//firebase初期化
+const firebaseConfig = {
+apiKey: "AIzaSyCrX6sUbpWJEUmSawe7WyU1u5klLS4mr-k",
+authDomain: "my-first-fullcalendar-app.firebaseapp.com",
+databaseURL: "https://my-first-fullcalendar-app-default-rtdb.firebaseio.com",
+projectId: "my-first-fullcalendar-app",
+storageBucket: "my-first-fullcalendar-app.appspot.com",
+messagingSenderId: "649050506909",
+appId: "1:649050506909:web:ce56e3c7cef466d318b674",
+measurementId: "G-BKWNBLCGTT"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+
+document.addEventListener('DOMContentLoaded', function() {
+  
+  onAuthStateChanged(auth, (user) => {
+	      console.log(user);
+	      if (user) {
+	        // User is signed in, see docs for a list of available properties
+	        // https://firebase.google.com/docs/reference/js/firebase.User
+	        console.log("User is signed in");
+
+	      } else {
+	        // User is signed out
+	        console.log("User is signed out");
+	      }
+	    });
+  
+  // Get & Update nextId 
+  const db = getDatabase();
+  const dbRef = ref_db(getDatabase());
+  get(child(dbRef, `users`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      console.log(snapshot.val());
+      const obj = snapshot.val();
+      const tbody = document.getElementById("tbody");
+      let tbodyhtml = "";
+      for (let x in obj) {
+          console.log(obj[x].name, obj[x].age, obj[x].imgURL);
+          tbodyhtml += `<tr><td>${obj[x].name}</td><td>${obj[x].age}</td><td><img src='${obj[x].imgURL}' style='width:5vh'></td></tr>`;
+      }
+      tbody.innerHTML = tbodyhtml;
+    } else {
+      console.log("No data available");
+    }
+  }).catch((error) => {
+    console.error(error);
+  });
+
+});
+
+</script>
+</head>
+<body>
+  
+  <table>
+  <caption>Realtime Database(Users)</caption>
+  <thead>
+  <tr><th>name</th><th>age</th><th>image</th></tr>
+  </thead>
+  <tbody id="tbody">
+  
+  </tbody>
+  </table>
+
+</body>
+</html>
