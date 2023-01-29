@@ -1,0 +1,268 @@
+<!--
+realtime db
+---
+{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}
+↓
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null"
+  }
+}
+
+【Firebase】Realtime Database（version 9）データ操作あれこれ
+https://qiita.com/shiho97797/items/de25f6d61f99497c4a35
+
+【Firebase】Authentication（version 9）の使い方
+https://qiita.com/shiho97797/items/22cbda84274bfecde98f
+
+firebase v9 Authentication の変更で、苦戦したメモ
+https://zenn.dev/knaka0209/articles/9472e94612a6f0
+
+How to create an HTML button that acts like a link?
+https://www.geeksforgeeks.org/how-to-create-an-html-button-that-acts-like-a-link/
+-->
+<html>
+<head>
+<meta charset='utf-8'>
+<!--
+<script type="module">
+//--------------------------- firbase.js start
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+//import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js"
+
+//firebase初期化
+const firebaseConfig = {
+apiKey: "AIzaSyCrX6sUbpWJEUmSawe7WyU1u5klLS4mr-k",
+authDomain: "my-first-fullcalendar-app.firebaseapp.com",
+databaseURL: "https://my-first-fullcalendar-app-default-rtdb.firebaseio.com",
+projectId: "my-first-fullcalendar-app",
+storageBucket: "my-first-fullcalendar-app.appspot.com",
+messagingSenderId: "649050506909",
+appId: "1:649050506909:web:ce56e3c7cef466d318b674",
+measurementId: "G-BKWNBLCGTT"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+//export { auth };
+//export default db;
+
+//--------------------------- firbase.js end
+</script>
+-->
+</head>
+<body>
+
+  <h1>ログイン</h1>
+  <form>
+    <div>
+      <label>メールアドレス<input id="email" name="email" type="email" value="masaki@xyz.com"></label>
+    </div>
+    <div>
+      <label>パスワード<input id="password" name="password" type="password" value="1234!abcd"></label>
+    </div>
+    <hr>
+    <div>
+      <button id="signin_btn">ログイン</button>
+      <button id="signout_btn">ログアウト</button>
+    </div>
+    <hr>
+    <div>
+      <button id="register_btn">アカウント登録</button>
+      <button id="delete_btn">アカウント削除</button>
+    </div>
+    <hr>
+    <div>
+      <button type="button" onclick="window.location = 'firebase_auth_rtdb_storage3.html';">DB検索(最新５件)</button>
+      <button type="button" onclick="window.location = 'firebase_auth_rtdb_storage2.html';">DB全件検索</button>
+      <button type="button" onclick="window.location = 'firebase_auth_rtdb_storage.html';">DB新規登録</button>
+      <p>※</p>
+      <p>1) DBを更新する場合はログインが必要</p>
+      <p>2) ログインするにはアカウント（メールアドレス）の登録が必要</p>
+      <p>3) アカウント（メールアドレス）の登録には８文字以上のパスワードを指定</p>
+    </div>
+  </form>
+  
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+//import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js"
+
+//firebase初期化
+const firebaseConfig = {
+apiKey: "AIzaSyCrX6sUbpWJEUmSawe7WyU1u5klLS4mr-k",
+authDomain: "my-first-fullcalendar-app.firebaseapp.com",
+databaseURL: "https://my-first-fullcalendar-app-default-rtdb.firebaseio.com",
+projectId: "my-first-fullcalendar-app",
+storageBucket: "my-first-fullcalendar-app.appspot.com",
+messagingSenderId: "649050506909",
+appId: "1:649050506909:web:ce56e3c7cef466d318b674",
+measurementId: "G-BKWNBLCGTT"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+
+document.addEventListener('DOMContentLoaded', function() {
+
+	onAuthStateChanged(auth, (user) => {
+	      console.log(user);
+	      if (user) {
+	        // User is signed in, see docs for a list of available properties
+	        // https://firebase.google.com/docs/reference/js/firebase.User
+	        console.log("User is signed in");
+
+	      } else {
+	        // User is signed out
+	        console.log("User is signed out");
+	      }
+	    });
+
+	document.getElementById("signin_btn").addEventListener("click", function() {
+	    
+	    event.preventDefault();
+	    
+		const email =  document.getElementById("email").value;
+		const password = document.getElementById("password").value;
+		if(password.length >= 8){
+			const auth = getAuth();
+			signInWithEmailAndPassword(auth, email, password)
+			  .then((userCredential) => {
+			    // Signed in 
+			    console.log('ログイン成功=');
+			    console.log("OK", userCredential);
+		            
+		        console.log(userCredential.user.accessToken); //トークンを取得
+				console.log(userCredential.user.email);       //メールアドレスを取得
+				console.log(userCredential.user.uid);        //ユーザーIDを取得
+				console.log(userCredential.user.metadata.createdAt);   //ユーザー作成日時を取得
+				console.log(userCredential.user.metadata.lastLoginAt); //最終ログイン日時を取得
+			    //console.log('user created');
+			    //const user = userCredential.user;
+			    // ...
+			  })
+			  .catch((error) => {
+			    console.log(error);
+			    console.log({ code: error.code, message: error.message });
+			    const errorCode = error.code;
+			    const errorMessage = error.message;
+			    console.log(errorCode);     // auth/user-not-found
+			    console.log(errorMessage);  // Firebase: Error (auth/user-not-found).
+			    
+		        //auth/invalid-emailの意味
+		        //Authに渡したメールアドレスが、メールアドレスの形をしていない場合に出るエラーです。 （例：email : aaaaa）
+		        if (error.code === "auth/invalid-email") {
+		            this.emailErrorMassage = "このメールアドレスは適切ではありません";
+		            //auth/email-already-in-useの意味
+                    //メールアドレスが既に登録済みである場合に出るエラーです。
+    	        } else if (error.code === "auth/email-already-in-use") {
+		            this.emailErrorMassage = "このメールアドレスは既に登録されています";
+		        } else if (error.code === "auth/user-not-found") {
+		            alert("このメールアドレスは登録されていません。");
+		        } else {
+		            alert("エラーが発生いたしました。再度入力をお願いします。");
+		        }
+			    
+			  });
+		}else{
+		    console.log("password length too short!"); 
+		}
+	    
+	});
+
+	document.getElementById("signout_btn").addEventListener("click", function() {
+	    
+	    event.preventDefault();
+	    
+		const email =  document.getElementById("email").value;
+		const password = document.getElementById("password").value;
+		if(password.length >= 8){
+			const auth = getAuth();
+			signOut(auth).then(()=>{
+		      console.log("ログアウトしました");
+		    })
+		    .catch( (error)=>{
+		      console.log(`ログアウト時にエラーが発生しました (${error})`);
+		    });
+		}else{
+		    console.log("password length too short!"); 
+		}
+	    
+	});
+    
+	document.getElementById("register_btn").addEventListener("click", function() {
+	
+		event.preventDefault();
+		
+		const email =  document.getElementById("email").value;
+		const password = document.getElementById("password").value;
+		if(password.length >= 8){
+			const auth = getAuth();
+			createUserWithEmailAndPassword(auth, email, password)
+			  .then((userCredential) => {
+			    // Signed in 
+			    console.log('登録成功');
+			    const user = userCredential.user;
+			    
+			    //登録が成功した時の処理
+	            console.log("OK", userCredential);
+	            
+	            console.log(userCredential.user.accessToken); //トークンを取得
+				console.log(userCredential.user.email);       //メールアドレスを取得
+				console.log(userCredential.user.uid);        //ユーザーIDを取得
+				console.log(userCredential.user.metadata.createdAt);   //ユーザー作成日時を取得
+				console.log(userCredential.user.metadata.lastLoginAt); //最終ログイン日時を取得
+			    
+			    
+			    
+			    // ...
+			  })
+			  .catch((error) => {
+			    console.log(error.code);
+			    console.log(error.message);
+			    if (error.code === "auth/email-already-in-use") {
+		            alert("このメールアドレスは既に登録されています。");
+		        } else {
+		            alert("エラーが発生いたしました。再度入力をお願いします。");
+		        }
+			    // ..
+			  });
+		}else{
+		    console.log("password length too short!");
+		    alert("エラーが発生いたしました。再度入力をお願いします。");
+		}
+	    
+	});
+	
+	document.getElementById("delete_btn").addEventListener("click", function() {
+	
+		event.preventDefault();
+		
+		const email =  document.getElementById("email").value;
+		const auth = getAuth();
+		deleteUser(auth.currentUser).then(function () {
+			//削除が成功したときの処理
+			console.log('削除成功');
+		}).catch(function (error) {
+			//削除が失敗したときの処理
+			alert("エラーが発生いたしました。再度入力をお願いします。");
+		});
+	    
+	});
+	
+});
+
+</script>
+</body>
+</html>
